@@ -1,3 +1,11 @@
-from django.shortcuts import render
+from rest_framework.authtoken.admin import User
+from rest_framework.generics import CreateAPIView
+from rest_framework.views import APIView
 
-# Create your views here.
+from cash_managemnet.serilalizers import SignupSerializer
+
+
+class SignupView(CreateAPIView):
+    model = User
+    serializer_class = SignupSerializer
+
