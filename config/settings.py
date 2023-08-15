@@ -28,6 +28,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+
+
 INSTALLED_APPS = [
     'accounts',
     'django.contrib.admin',
@@ -37,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'cash_managemnet',
+    'rest_framework',
     'rest_framework.authtoken',  # added for token based login
 
 ]
@@ -128,3 +131,4 @@ REST_FRAMEWORK = {
 }
 
 ALLOWED_JSON_URLS = ["admin"]
+
