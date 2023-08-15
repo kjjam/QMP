@@ -1,10 +1,9 @@
 from django.urls import path
-from rest_framework.authtoken.views import obtain_auth_token
 
-from cash_managemnet.views import SignupView, LogOutView
+from cash_managemnet.views import CreateTransactionView, UpdateTransactionView, DeleteTransactionView
 
 urlpatterns = [
-    path("signup", SignupView.as_view(), name="signup"),
-    path("login", obtain_auth_token, name="login"),
-    path("logout", LogOutView.as_view(), name="logout")
+    path("insert-transaction", CreateTransactionView.as_view()),
+    path("update-transaction/<int:pk>", UpdateTransactionView.as_view()),
+    path("delete-transaction/<int:pk>", DeleteTransactionView.as_view())
 ]
