@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Sum, Q
 from rest_framework.authtoken.admin import User
 
@@ -54,12 +54,14 @@ class Transaction(models.Model):
     ]
 
     def save(self, *args, **kwargs):
-        transaction = super(Transaction, self).save(*args, **kwargs)
-        balance, _ = Balance.objects.get_or_create(user=self.user)
-        balance.update_balance_amount()
-        return transaction
+        with transaction.atomic():
+            transact = super(Transaction, self).save(*args, **kwargs)
+            balance, _ = Balance.objects.get_or_create(user=self.user)
+            balance.update_balance_amount()
+            return transact
 
     def delete(self, *args):
-        super(Transaction, self).delete(*args)
-        balance, _ = Balance.objects.get(user=self.user)
-        balance.update_balance_amount()
+        with transaction.atomic():
+            super(Transaction, self).delete(*args)
+            balance, _ = Balance.objects.get(user=self.user)
+            balance.update_balance_amount()
