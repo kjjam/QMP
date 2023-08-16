@@ -4,7 +4,7 @@ from cash_managemnet.models import Transaction
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    date = serializers.DateTimeField()
+    date = serializers.DateTimeField(required=False)
 
     class Meta:
         model = Transaction
