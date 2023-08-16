@@ -45,3 +45,8 @@ class Transaction(models.Model):
         balance, _ = Balance.objects.get_or_create(user=self.user)
         balance.update_balance_amount()
         return transaction
+
+    def delete(self, *args):
+        super(Transaction, self).delete(*args)
+        balance, _ = Balance.objects.get(user=self.user)
+        balance.update_balance_amount()
