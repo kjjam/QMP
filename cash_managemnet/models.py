@@ -15,3 +15,12 @@ class Transaction(models.Model):
     type = models.CharField(max_length=1, choices=TypeChoices.choices)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     date = models.DateTimeField(auto_now_add=True)
+
+    filtering_lookups = [
+        ('type__exact', 'type',),
+        ('category__exact', 'category'),
+        ('amount__lt', 'amount__lt'),
+        ('amount__gt', 'amount__gt'),
+        ('date__lt', 'date__lt'),
+        ('date_gt', 'date__gt')
+    ]

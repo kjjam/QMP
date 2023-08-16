@@ -1,9 +1,11 @@
-from rest_framework.serializers import ModelSerializer
 
+from rest_framework import serializers
 from cash_managemnet.models import Transaction
 
 
-class TransactionSerializer(ModelSerializer):
+class TransactionSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField()
+
     class Meta:
         model = Transaction
         fields = ["id", "amount", "type", "category", "date"]
