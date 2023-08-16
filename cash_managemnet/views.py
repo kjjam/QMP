@@ -1,5 +1,11 @@
+from datetime import datetime
+
+from django.db.models import Sum, Q, F
+from django.db.models.functions import TruncMonth
 from rest_framework.generics import CreateAPIView, UpdateAPIView, DestroyAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from cash_managemnet.models import Transaction
 from cash_managemnet.serializers import TransactionSerializer
@@ -54,3 +60,22 @@ class GetAllTransactionView(ListAPIView):
         if order_by is None or order_by not in [f.name for f in self.model._meta.get_fields()]:
             order_by = "id"
         return queryset.filter(**filter_lookups).order_by(order_by)
+
+
+class GenerateReportMonthly(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request):
+        expected_args = ["date__lt", "date__gt"]
+        filter_lookups = {}
+        request_args = request.GET
+        for arg in expected_args:
+            if value := request_args.get(arg):
+                filter_lookups[arg] = value
+        transactions = Transaction.objects.filter(user=request.user, **filter_lookups).annotate(
+            month=TruncMonth("date")).values("month").annotate(
+            expenses=Sum("amount", filter=Q(type=Transaction.TypeChoices.EXPENSE)),
+            incomes=Sum("amount", filter=Q(type=Transaction.TypeChoices.INCOME)),
+        ).values("month", "expenses", "incomes")
+
+        return Response(transactions, status=200)
