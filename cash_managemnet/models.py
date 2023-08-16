@@ -12,12 +12,21 @@ class Balance(models.Model):
     amnt = models.IntegerField(default=0)
 
     def update_balance_amount(self):
-        expense_income = Transaction.objects.filter(user=self.user).aggregate(
-            expense=Sum("amount", filter=Q(type=Transaction.TypeChoices.EXPENSE)),
-            income=Sum("amount", filter=Q(type=Transaction.TypeChoices.INCOME)),
-        )
-        self.amnt = expense_income["income"] - expense_income["expense"]
+        incomes = Transaction.incomes.filter(user=self.user).aggregate(val=Sum("amount"))["val"]
+        expenses = Transaction.expenses.filter(user=self.user).aggregate(val=Sum("amount"))["val"]
+
+        self.amnt = incomes - expenses
         self.save()
+
+
+class TransactionIncomeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(type=Transaction.TypeChoices.INCOME)
+
+
+class TransactionExpenseManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(type=Transaction.TypeChoices.EXPENSE)
 
 
 class Transaction(models.Model):
@@ -30,6 +39,10 @@ class Transaction(models.Model):
     type = models.CharField(max_length=1, choices=TypeChoices.choices)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     date = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+    incomes = TransactionIncomeManager()
+    expenses = TransactionExpenseManager()
 
     filtering_lookups = [
         ('type__exact', 'type',),
