@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum, Q
 from rest_framework.authtoken.admin import User
 
 
@@ -9,6 +10,14 @@ class Category(models.Model):
 class Balance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amnt = models.IntegerField(default=0)
+
+    def update_balance_amount(self):
+        expense_income = Transaction.objects.filter(user=self.user).aggregate(
+            expense=Sum("amount", filter=Q(type=Transaction.TypeChoices.EXPENSE)),
+            income=Sum("amount", filter=Q(type=Transaction.TypeChoices.INCOME)),
+        )
+        self.amnt = expense_income["income"] - expense_income["expense"]
+        self.save()
 
 
 class Transaction(models.Model):
@@ -32,4 +41,7 @@ class Transaction(models.Model):
     ]
 
     def save(self, *args, **kwargs):
-        super(Transaction, self).save(*args, **kwargs)
+        transaction = super(Transaction, self).save(*args, **kwargs)
+        balance, _ = Balance.objects.get_or_create(user=self.user)
+        balance.update_balance_amount()
+        return transaction
