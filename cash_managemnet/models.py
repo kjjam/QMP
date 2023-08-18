@@ -15,7 +15,7 @@ class Balance(models.Model):
         incomes = Transaction.incomes.filter(user=self.user).aggregate(val=Sum("amount"))["val"]
         expenses = Transaction.expenses.filter(user=self.user).aggregate(val=Sum("amount"))["val"]
 
-        self.amnt = incomes - expenses
+        self.amnt = incomes if incomes else 0 - expenses if expenses else 0
         self.save()
 
 
