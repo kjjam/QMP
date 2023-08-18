@@ -243,3 +243,12 @@ response=`{"non_field_errors":["Unable to log in with provided credentials."]}`
 
 ```
 - response unauthorized(status=401)
+
+
+##  Contributing
+
+- Git clone https://github.com/kjjam/QMP.git
+- Make the changes.
+- Write your tests.
+- If everything is OK. push your changes and make a pull request.
+
