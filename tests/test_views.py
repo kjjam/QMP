@@ -253,3 +253,67 @@ class TestDeleteTransactionView(TestCase):
         self.assertEqual(Transaction.objects.all().count(), 1)
 
 
+class TestGetTransactionView(TestCase):
+    username = "keyvan"
+    password = "123456"
+
+    def setUp(self):
+        self.token = self._login(self.username, self.password)
+
+    def _logout(self, username):
+        Token.objects.get(user__username=username).delete()
+
+    def _login(self, username, password):
+        user = User.objects.create_user(username=username, password=password)
+        response = self.client.post(reverse("login"), data={"username": username, "password": password},
+                                    content_type="application/json")
+        return response.data['token']
+
+    def _request(self, url, data, token, method="POST"):
+        content_type = "application/json"
+        headers = {"Authorization": f"Token {token}"}
+
+        if method == "POST":
+            return self.client.post(url, data, content_type=content_type, headers=headers)
+        elif method == "PUT":
+            return self.client.put(url, data, content_type=content_type, headers=headers)
+        elif method == "PATCH":
+            return self.client.patch(url, data, content_type=content_type, headers=headers)
+        elif method == "DELETE":
+            return self.client.delete(url, data, content_type=content_type, headers=headers)
+        else:
+            headers["Content_Type"] = "application/json"
+            return self.client.get(url, data, content_type=content_type, headers=headers)
+
+    def test_get_transaction_not_login(self):
+        self._request(reverse("insert-transaction"), {"amount": 200, "type": "I"}, self.token, "POST")
+        idd = Transaction.objects.all().first().id
+        self._logout(self.username)
+        response = self._request(reverse("transaction", args=[1]), {}, self.token, "GET")
+        self.assertEqual(response.status_code, 401, "should return response with 401 status code")
+
+    def test_get_transaction_successfully(self):
+        transaction = Transaction.objects.create(user_id=1, amount=200, type="I", category=None,
+                                                 date=datetime.datetime(2020, 10, 10, 10, 10, 10, 0))
+        response = self._request(reverse("transaction", args=[transaction.id]), {}, self.token, "GET")
+
+        self.assertEqual(len(response.data.keys()), 5)
+        self.assertEqual(response.data["id"], transaction.id)
+        self.assertEqual(response.data["amount"], 200)
+        self.assertEqual(response.data["type"], "I")
+        self.assertEqual(response.data["category"], None)
+        self.assertEqual(datetime.datetime.fromisoformat(response.data["date"][:-1]), transaction.date)
+
+    def test_get_not_found_transaction(self):
+        repsonse2 = self._request(reverse("transaction", args=[123132]), {}, self.token, "GET")
+        self.assertEqual(repsonse2.status_code, 404, "This transaction is not found ")
+
+    def test_get_another_user_transaction(self):
+        another_token = self._login("another user", "123456")
+        response1 = self._request(reverse("insert-transaction"), {"amount": 10, "type": "E"}, another_token,
+                                  "POST")
+        new_transaction = Transaction.objects.get(id=response1.data["id"])
+        self._logout("another user")
+
+        repsonse2 = self._request(reverse("transaction", args=[new_transaction.id]), {}, self.token, "GET")
+        self.assertEqual(repsonse2.status_code, 404, "This transaction is not found for current user")
