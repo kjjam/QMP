@@ -90,21 +90,21 @@ response=`{"non_field_errors":["Unable to log in with provided credentials."]}`
 
 - request body:
 ```json
-request = {
-    "amount":<int>, #required
-    "type":<char[I,E]>, #required
-    "category":<int>,
-    "date":<datetime>
+{
+    "amount":100, 
+    "type":"I",
+    "category":1,
+    "date":"2023-01-01T00:00:00"
     }
 ```
 - response body (status=200):
 ```json
-response= {
-    "id":<int>,
-    "amount":<int>,
-    "type":<char[I,E]>,
-    "category":<int>,
-    "date":<datetime>
+{
+    "id": 1,
+    "amount":100, 
+    "type":"I",
+    "category":1,
+    "date":"2023-01-01T00:00:00"
     }
 ```
 - response uauthorized(status=401)
@@ -120,21 +120,21 @@ response= {
 
 - request body:
 ```json
-request = {
-    "amount":<int>
-    "type":<char[I,E]>
-    "category":<int>,
-    "date":<datetime>
+{
+    "amount":100, 
+    "type":"I",
+    "category":1,
+    "date":"2023-01-01T00:00:00"
     }
 ```
 - response body (status=200):
 ```json
-response= {
-    "id":<int>,
-    "amount":<int>,
-    "type":<char[I,E]>,
-    "category":<int>,
-    "date":<datetime>
+{
+    "id": 1,
+    "amount":100, 
+    "type":"I",
+    "category":1,
+    "date":"2023-01-01T00:00:00"
     }
 ```
 - response uauthorized(status=401)
@@ -158,12 +158,12 @@ response= {
 
 - response body (status=200):
 ```json
-response= {
-    "id":<int>,
-    "amount":<int>,
-    "type":<char[I,E]>,
-    "category":<int>,
-    "date":<datetime>
+{
+    "id":1,
+    "amount":100, 
+    "type":"I",
+    "category":1,
+    "date":"2023-01-01T00:00:00"
     }
 ```
 - not found or not accessed transaction(status=404)
@@ -191,20 +191,22 @@ response= {
 
 - response body (status=200):
 ```json
-response= [
+[
     {
-    "id":<int>,
-    "amount":<int>,
-    "type":<char[I,E]>,
-    "category":<int>,
-    "date":<datetime>
+        "id":1,
+        "amount":100, 
+        "type":"I",
+        "category":1,
+        "date":"2023-01-01T00:00:00"
     },
     {
-        "id":<int>
-        ...
+        "id":2,
+        "amount":100, 
+        "type":"I",
+        "category":1,
+        "date":"2023-01-01T00:00:00"
     }
-    ...
-    ]
+ ]
 ```
 - response uauthorized(status=401)
 
@@ -225,19 +227,19 @@ response= [
 
 - response body (status=200):
 ```json
-response_monthly report=
  [
 
     {
-        "month": <datetime>,
-        "expenses": <int> or null,
-        "incomes": <int> or null
+        "month": "2023-01-01T00:00:00",
+        "expenses": 200,
+        "incomes": 500
     },
     {
-        "month":<datetime>,
-        ...
+        "month":"2023-02-01T00:00:00",
+        "expenses": 550,
+        "incomes": 100
     }
-    ...
 ]
+
 ```
-- response uauthorized(status=401)
+- response unauthorized(status=401)
