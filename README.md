@@ -245,6 +245,15 @@ response=`{"non_field_errors":["Unable to log in with provided credentials."]}`
 - response unauthorized(status=401)
 
 
+
+## Middlewares
+There is a middleware implemented in the project to block non-json requests.
+
+This behaviour can be changes in setting.py :
+
+`ALLOWED_JSON_URLS = ["admin"]`
+
+By the above line , the application accepts `/admin/*` request in non-json content type.
 ##  Contributing
 
 - Git clone https://github.com/kjjam/QMP.git
