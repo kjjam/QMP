@@ -2,7 +2,11 @@
 FROM python:3.9-alpine
 
 # set work directory in the container
-WORKDIR /usr/src/app
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir -p $APP_HOME
+WORKDIR $APP_HOME
 
 #Prevents Python from writing pyc files to disc
 ENV PYTHONDONTWRITEBYTECODE 1
