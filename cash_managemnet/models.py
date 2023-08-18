@@ -63,5 +63,5 @@ class Transaction(models.Model):
     def delete(self, *args):
         with transaction.atomic():
             super(Transaction, self).delete(*args)
-            balance, _ = Balance.objects.get(user=self.user)
+            balance= Balance.objects.get(user=self.user)
             balance.update_balance_amount()
