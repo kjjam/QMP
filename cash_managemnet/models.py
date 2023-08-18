@@ -1,5 +1,6 @@
 from django.db import models, transaction
 from django.db.models import Sum
+from django.utils import timezone
 from rest_framework.authtoken.admin import User
 
 
@@ -87,7 +88,7 @@ class Transaction(models.Model):
     amount = models.PositiveIntegerField()
     type = models.CharField(max_length=1, choices=TypeChoices.choices)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    date = models.DateTimeField(auto_now_add=True)  # 2020-01-01T12:12:12
+    date = models.DateTimeField(default=timezone.now)  # 2020-01-01T12:12:12
 
     objects = models.Manager()  # first and default manager
     incomes = TransactionIncomeManager()  # Transaction.incomes.all()

@@ -10,10 +10,6 @@ class TransactionSerializer(serializers.ModelSerializer):
     selected_fields = id, amount, type, category, date
     """
 
-    # because the date field in the model is auto-add-now and not editable,
-    #    so there should be another date field in this serializer
-    date = serializers.DateTimeField(required=False)
-
     class Meta:
         model = Transaction
         fields = ["id", "amount", "type", "category", "date"]  # model fields
