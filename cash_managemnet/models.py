@@ -84,7 +84,7 @@ class Transaction(models.Model):
         INCOME = ("I", "Income")
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    amount = models.PositiveIntegerField(default=1)
+    amount = models.PositiveIntegerField()
     type = models.CharField(max_length=1, choices=TypeChoices.choices)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     date = models.DateTimeField(auto_now_add=True)  # 2020-01-01T12:12:12
