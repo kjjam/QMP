@@ -4,11 +4,11 @@ from cash_managemnet.views import CreateTransactionView, UpdateTransactionView, 
     GetTransactionView, GetAllTransactionView, GenerateReportMonthly
 
 urlpatterns = [
-    path("insert-transaction", CreateTransactionView.as_view()),
-    path("update-transaction/<int:pk>", UpdateTransactionView.as_view()),
-    path("delete-transaction/<int:pk>", DeleteTransactionView.as_view()),
-    path("transaction/<int:pk>", GetTransactionView.as_view()),
-    path("transaction/", GetAllTransactionView.as_view()),
-    path("report", GenerateReportMonthly.as_view())
+    path("insert-transaction", CreateTransactionView.as_view(), name="insert-transaction"),
+    path("update-transaction/<int:pk>", UpdateTransactionView.as_view(), name="update-transaction"),
+    path("delete-transaction/<int:pk>", DeleteTransactionView.as_view(), name="delete-transaction"),
+    path("transaction/<int:pk>", GetTransactionView.as_view(), name="transaction"),
+    path("transaction/", GetAllTransactionView.as_view(), name="all-transaction"),
+    path("report", GenerateReportMonthly.as_view(), name='report')
 
 ]
