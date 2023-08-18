@@ -144,7 +144,7 @@ class TestCreateTransactionView(TestCase):
                                          "Authorization": f"Token {self.token}"}
                                      )
         new_transaction = Transaction.objects.get(id=response2.data["id"])
-        self.assertEqual(new_transaction.amount,200)
+        self.assertEqual(new_transaction.amount, 200)
         self.assertEqual(response2.status_code, 201, "Amount is provided so it is ok!")
 
     # The current authenticated user should be the creator of the transaction.
@@ -195,4 +195,61 @@ class TestCreateTransactionView(TestCase):
         new_transaction = Transaction.objects.get(id=response1.data["id"])
         self.assertEqual(datetime.datetime.fromisoformat(data["date"]), new_transaction.date,
                          "date should be filled automatically")
+
+
+class TestDeleteTransactionView(TestCase):
+    username = "keyvan"
+    password = "123456"
+
+    def setUp(self):
+        self.token = self._login(self.username, self.password)
+
+    def _logout(self, username):
+        Token.objects.get(user__username=username).delete()
+
+    def _login(self, username, password):
+        user = User.objects.create_user(username=username, password=password)
+        response = self.client.post(reverse("login"), data={"username": username, "password": password},
+                                    content_type="application/json")
+        return response.data['token']
+
+    def _request(self, url, data, token, method="POST"):
+        content_type = "application/json"
+        headers = {"Authorization": f"Token {token}"}
+
+        if method == "POST":
+            return self.client.post(url, data, content_type=content_type, headers=headers)
+        elif method == "PUT":
+            return self.client.put(url, data, content_type=content_type, headers=headers)
+        elif method == "PATCH":
+            return self.client.patch(url, data, content_type=content_type, headers=headers)
+        elif method == "DELETE":
+            return self.client.delete(url, data, content_type=content_type, headers=headers)
+        else:
+            return self.client.get(url, data, content_type=content_type, headers=headers)
+
+    def test_delete_transaction_not_login(self):
+        self._logout(self.username)
+        response = self._request(reverse("delete-transaction", args=[1]), {}, self.token, "POST")
+        self.assertEqual(response.status_code, 401, "should return response with 401 status code")
+
+    def test_delete_transaction_not_found(self):
+        response = self._request(reverse("delete-transaction", args=[1]), {}, "DELETE")
+        self.assertEqual(response.status_code, 404, "Transaction should not be found")
+
+    def test_delete_transaction_delete_another_user_transaction(self):
+        another_token = self._login("another user", "123456")
+        response1 = self._request(reverse("insert-transaction"), {"amount": 10, "type": "E"}, another_token,
+                                  "POST")
+        new_transaction = Transaction.objects.get(id=response1.data["id"])
+        self._logout("another user")
+
+        self.assertEqual(Transaction.objects.filter(user__username='another user').count(), 1)
+        self.assertEqual(Transaction.objects.all().count(), 1)
+
+        reponse2 = self._request(reverse("delete-transaction", args=[new_transaction.id]), {}, self.token, "DELETE")
+        self.assertEqual(reponse2.status_code, 404, "This transaction is not found for current user")
+        self.assertEqual(Transaction.objects.filter(user__username='another user').count(), 1)
+        self.assertEqual(Transaction.objects.all().count(), 1)
+
 
