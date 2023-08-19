@@ -234,7 +234,7 @@ class TestDeleteTransactionView(TestCase):
         self.assertEqual(response.status_code, 401, "should return response with 401 status code")
 
     def test_delete_transaction_not_found(self):
-        response = self._request(reverse("delete-transaction", args=[1]), {}, "DELETE")
+        response = self._request(reverse("delete-transaction", args=[144564]), {}, self.token,"DELETE")
         self.assertEqual(response.status_code, 404, "Transaction should not be found")
 
     def test_delete_transaction_delete_another_user_transaction(self):
@@ -286,8 +286,6 @@ class TestGetTransactionView(TestCase):
             return self.client.get(url, data, content_type=content_type, headers=headers)
 
     def test_get_transaction_not_login(self):
-        self._request(reverse("insert-transaction"), {"amount": 200, "type": "I"}, self.token, "POST")
-        idd = Transaction.objects.all().first().id
         self._logout(self.username)
         response = self._request(reverse("transaction", args=[1]), {}, self.token, "GET")
         self.assertEqual(response.status_code, 401, "should return response with 401 status code")
@@ -317,3 +315,56 @@ class TestGetTransactionView(TestCase):
 
         repsonse2 = self._request(reverse("transaction", args=[new_transaction.id]), {}, self.token, "GET")
         self.assertEqual(repsonse2.status_code, 404, "This transaction is not found for current user")
+
+
+class TestGetAllTransactionView(TestCase):
+    username = "keyvan"
+    password = "123456"
+
+    def setUp(self):
+        self.token = self._login(self.username, self.password)
+
+    def _logout(self, username):
+        Token.objects.get(user__username=username).delete()
+
+    def _login(self, username, password):
+        user = User.objects.create_user(username=username, password=password)
+        response = self.client.post(reverse("login"), data={"username": username, "password": password},
+                                    content_type="application/json")
+        return response.data['token']
+
+    def _request(self, url, data, token, method="POST"):
+        content_type = "application/json"
+        headers = {"Authorization": f"Token {token}"}
+
+        if method == "POST":
+            return self.client.post(url, data, content_type=content_type, headers=headers)
+        elif method == "PUT":
+            return self.client.put(url, data, content_type=content_type, headers=headers)
+        elif method == "PATCH":
+            return self.client.patch(url, data, content_type=content_type, headers=headers)
+        elif method == "DELETE":
+            return self.client.delete(url, data, content_type=content_type, headers=headers)
+        else:
+            headers["Content_Type"] = "application/json"
+            return self.client.get(url, data, content_type=content_type, headers=headers)
+
+    def test_get_all_transaction_not_login(self):
+        self._logout(self.username)
+        response = self._request(reverse("all-transaction"), {}, self.token, "GET")
+        self.assertEqual(response.status_code, 401, "should return response with 401 status code")
+
+    def test_get_all_transactions_successful(self):
+        another_user = User.objects.create_user(username="another_user", password="123456")
+        Transaction.objects.create(user_id=1, amount=200, type="I")
+        Transaction.objects.create(user_id=1, amount=500, type="E")
+        Transaction.objects.create(user_id=another_user.id, amount=200, type="I")
+
+        response = self._request(reverse("all-transaction"), {}, self.token, "GET")
+        self.assertEqual(len(response.data), 2)
+
+
+
+
+
+
